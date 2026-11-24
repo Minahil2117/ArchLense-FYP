@@ -1,0 +1,8 @@
+flowchart LR
+  Gateway[API Gateway] --> User[User Service]
+  Gateway --> Post[Post Service]
+  Gateway --> Feed[Feed Service]
+  User --> Post
+  Post --> Feed
+  Feed --> User
+  Post --> User

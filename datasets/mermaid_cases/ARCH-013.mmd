@@ -1,0 +1,11 @@
+flowchart LR
+  Client[Streaming Client] --> Gateway[API Gateway]
+  Gateway --> Playback[Playback Service]
+  Gateway --> Catalog[Catalog Service]
+  Gateway --> Auth[Auth Service]
+  Playback --> CDN[Content Delivery Network]
+  Catalog --> CatalogDB[(Catalog DB)]
+  Auth --> AuthDB[(Auth DB)]
+  Ingest[Ingest Service] --> Broker[Event Stream]
+  Broker --> Transcode[Transcoding Workers]
+  Transcode --> ObjectStore[(Media Object Storage)]

@@ -1,0 +1,524 @@
+{
+  "parser_success_rate": 1.0,
+  "overall_precision": 0.5714285714285714,
+  "overall_recall": 1.0,
+  "overall_f1": 0.7272727272727273,
+  "rule_metrics": {
+    "AP-04": {
+      "TP": 2,
+      "FP": 11,
+      "FN": 0
+    },
+    "AP-02": {
+      "TP": 8,
+      "FP": 0,
+      "FN": 0
+    },
+    "AP-05": {
+      "TP": 4,
+      "FP": 2,
+      "FN": 0
+    },
+    "AP-03": {
+      "TP": 3,
+      "FP": 0,
+      "FN": 0
+    },
+    "AP-09": {
+      "TP": 3,
+      "FP": 0,
+      "FN": 0
+    },
+    "AP-01": {
+      "TP": 2,
+      "FP": 2,
+      "FN": 0
+    },
+    "AP-08": {
+      "TP": 1,
+      "FP": 1,
+      "FN": 0
+    },
+    "AP-07": {
+      "TP": 3,
+      "FP": 0,
+      "FN": 0
+    },
+    "AP-06": {
+      "TP": 1,
+      "FP": 2,
+      "FN": 0
+    },
+    "AP-12": {
+      "TP": 1,
+      "FP": 3,
+      "FN": 0
+    }
+  },
+  "cases": [
+    {
+      "case_id": "ARCH-001",
+      "domain": "E-commerce",
+      "name": "Balanced e-commerce baseline",
+      "expected": [],
+      "detected": [
+        "AP-04"
+      ],
+      "true_positives": [],
+      "false_positives": [
+        "AP-04"
+      ],
+      "false_negatives": [],
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "ARCH-002",
+      "domain": "E-commerce",
+      "name": "Shared database across business services",
+      "expected": [
+        "AP-02"
+      ],
+      "detected": [
+        "AP-02",
+        "AP-04"
+      ],
+      "true_positives": [
+        "AP-02"
+      ],
+      "false_positives": [
+        "AP-04"
+      ],
+      "false_negatives": [],
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "ARCH-003",
+      "domain": "E-commerce",
+      "name": "Long synchronous checkout chain",
+      "expected": [
+        "AP-05"
+      ],
+      "detected": [
+        "AP-05"
+      ],
+      "true_positives": [
+        "AP-05"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "status": "PERFECT_MATCH"
+    },
+    {
+      "case_id": "ARCH-004",
+      "domain": "E-commerce",
+      "name": "Shared database and single gateway dependency",
+      "expected": [
+        "AP-02",
+        "AP-04"
+      ],
+      "detected": [
+        "AP-02",
+        "AP-04"
+      ],
+      "true_positives": [
+        "AP-02",
+        "AP-04"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "status": "PERFECT_MATCH"
+    },
+    {
+      "case_id": "ARCH-005",
+      "domain": "Banking",
+      "name": "Banking service with separated data ownership",
+      "expected": [],
+      "detected": [
+        "AP-04"
+      ],
+      "true_positives": [],
+      "false_positives": [
+        "AP-04"
+      ],
+      "false_negatives": [],
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "ARCH-006",
+      "domain": "Banking",
+      "name": "Circular service dependencies",
+      "expected": [
+        "AP-03"
+      ],
+      "detected": [
+        "AP-03"
+      ],
+      "true_positives": [
+        "AP-03"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "status": "PERFECT_MATCH"
+    },
+    {
+      "case_id": "ARCH-007",
+      "domain": "Banking",
+      "name": "No authentication component shown",
+      "expected": [
+        "AP-09"
+      ],
+      "detected": [
+        "AP-09"
+      ],
+      "true_positives": [
+        "AP-09"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "status": "PERFECT_MATCH"
+    },
+    {
+      "case_id": "ARCH-008",
+      "domain": "Banking",
+      "name": "Shared ledger database and synchronous chain",
+      "expected": [
+        "AP-02",
+        "AP-05"
+      ],
+      "detected": [
+        "AP-02",
+        "AP-05"
+      ],
+      "true_positives": [
+        "AP-02",
+        "AP-05"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "status": "PERFECT_MATCH"
+    },
+    {
+      "case_id": "ARCH-009",
+      "domain": "Food Delivery",
+      "name": "Event-driven delivery platform baseline",
+      "expected": [],
+      "detected": [
+        "AP-04"
+      ],
+      "true_positives": [],
+      "false_positives": [
+        "AP-04"
+      ],
+      "false_negatives": [],
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "ARCH-010",
+      "domain": "Food Delivery",
+      "name": "High service coupling through synchronous calls",
+      "expected": [
+        "AP-01",
+        "AP-03"
+      ],
+      "detected": [
+        "AP-01",
+        "AP-03",
+        "AP-04",
+        "AP-05",
+        "AP-08"
+      ],
+      "true_positives": [
+        "AP-01",
+        "AP-03"
+      ],
+      "false_positives": [
+        "AP-04",
+        "AP-05",
+        "AP-08"
+      ],
+      "false_negatives": [],
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "ARCH-011",
+      "domain": "Food Delivery",
+      "name": "Synchronous tracking fan-out bottleneck",
+      "expected": [
+        "AP-07"
+      ],
+      "detected": [
+        "AP-01",
+        "AP-07"
+      ],
+      "true_positives": [
+        "AP-07"
+      ],
+      "false_positives": [
+        "AP-01"
+      ],
+      "false_negatives": [],
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "ARCH-012",
+      "domain": "Food Delivery",
+      "name": "Shared data and missing asynchronous order events",
+      "expected": [
+        "AP-02",
+        "AP-08"
+      ],
+      "detected": [
+        "AP-02",
+        "AP-08"
+      ],
+      "true_positives": [
+        "AP-02",
+        "AP-08"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "status": "PERFECT_MATCH"
+    },
+    {
+      "case_id": "ARCH-013",
+      "domain": "Streaming",
+      "name": "Streaming platform with event pipeline baseline",
+      "expected": [],
+      "detected": [
+        "AP-04",
+        "AP-06"
+      ],
+      "true_positives": [],
+      "false_positives": [
+        "AP-04",
+        "AP-06"
+      ],
+      "false_negatives": [],
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "ARCH-014",
+      "domain": "Streaming",
+      "name": "Central synchronous processing bottleneck",
+      "expected": [
+        "AP-07"
+      ],
+      "detected": [
+        "AP-05",
+        "AP-07"
+      ],
+      "true_positives": [
+        "AP-07"
+      ],
+      "false_positives": [
+        "AP-05"
+      ],
+      "false_negatives": [],
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "ARCH-015",
+      "domain": "Streaming",
+      "name": "Single depicted storage dependency",
+      "expected": [
+        "AP-06"
+      ],
+      "detected": [
+        "AP-06"
+      ],
+      "true_positives": [
+        "AP-06"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "status": "PERFECT_MATCH"
+    },
+    {
+      "case_id": "ARCH-016",
+      "domain": "Streaming",
+      "name": "Synchronous playback chain and shared metadata database",
+      "expected": [
+        "AP-02",
+        "AP-05"
+      ],
+      "detected": [
+        "AP-02",
+        "AP-05"
+      ],
+      "true_positives": [
+        "AP-02",
+        "AP-05"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "status": "PERFECT_MATCH"
+    },
+    {
+      "case_id": "ARCH-017",
+      "domain": "Healthcare",
+      "name": "Separated clinical services baseline",
+      "expected": [],
+      "detected": [
+        "AP-04"
+      ],
+      "true_positives": [],
+      "false_positives": [
+        "AP-04"
+      ],
+      "false_negatives": [],
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "ARCH-018",
+      "domain": "Healthcare",
+      "name": "Shared patient database ownership",
+      "expected": [
+        "AP-02"
+      ],
+      "detected": [
+        "AP-02",
+        "AP-04"
+      ],
+      "true_positives": [
+        "AP-02"
+      ],
+      "false_positives": [
+        "AP-04"
+      ],
+      "false_negatives": [],
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "ARCH-019",
+      "domain": "Healthcare",
+      "name": "Direct client access to internal services",
+      "expected": [
+        "AP-04",
+        "AP-09"
+      ],
+      "detected": [
+        "AP-04",
+        "AP-09"
+      ],
+      "true_positives": [
+        "AP-04",
+        "AP-09"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "status": "PERFECT_MATCH"
+    },
+    {
+      "case_id": "ARCH-020",
+      "domain": "Healthcare",
+      "name": "Shared database, synchronous chain, and security evidence gap",
+      "expected": [
+        "AP-02",
+        "AP-05",
+        "AP-09"
+      ],
+      "detected": [
+        "AP-02",
+        "AP-05",
+        "AP-09"
+      ],
+      "true_positives": [
+        "AP-02",
+        "AP-05",
+        "AP-09"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "status": "PERFECT_MATCH"
+    },
+    {
+      "case_id": "ARCH-021",
+      "domain": "Social Media",
+      "name": "Social platform with independent domains",
+      "expected": [],
+      "detected": [
+        "AP-04",
+        "AP-12"
+      ],
+      "true_positives": [],
+      "false_positives": [
+        "AP-04",
+        "AP-12"
+      ],
+      "false_negatives": [],
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "ARCH-022",
+      "domain": "Social Media",
+      "name": "Excessive coupling and circular dependencies",
+      "expected": [
+        "AP-01",
+        "AP-03"
+      ],
+      "detected": [
+        "AP-01",
+        "AP-03",
+        "AP-04",
+        "AP-12"
+      ],
+      "true_positives": [
+        "AP-01",
+        "AP-03"
+      ],
+      "false_positives": [
+        "AP-04",
+        "AP-12"
+      ],
+      "false_negatives": [],
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "ARCH-023",
+      "domain": "Social Media",
+      "name": "Observability not evidenced",
+      "expected": [
+        "AP-12"
+      ],
+      "detected": [
+        "AP-04",
+        "AP-12"
+      ],
+      "true_positives": [
+        "AP-12"
+      ],
+      "false_positives": [
+        "AP-04"
+      ],
+      "false_negatives": [],
+      "status": "MISMATCH"
+    },
+    {
+      "case_id": "ARCH-024",
+      "domain": "Social Media",
+      "name": "Shared datastore, dense sync dependencies, and central feed fan-out",
+      "expected": [
+        "AP-02",
+        "AP-07"
+      ],
+      "detected": [
+        "AP-01",
+        "AP-02",
+        "AP-06",
+        "AP-07",
+        "AP-12"
+      ],
+      "true_positives": [
+        "AP-02",
+        "AP-07"
+      ],
+      "false_positives": [
+        "AP-01",
+        "AP-06",
+        "AP-12"
+      ],
+      "false_negatives": [],
+      "status": "MISMATCH"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+flowchart LR
+  App[Customer App] --> Gateway[API Gateway]
+  Gateway --> Order[Order Service]
+  Order --> Restaurant[Restaurant Service]
+  Restaurant --> Delivery[Delivery Service]
+  Order --> SharedDB[(Shared Delivery DB)]
+  Restaurant --> SharedDB
+  Delivery --> SharedDB

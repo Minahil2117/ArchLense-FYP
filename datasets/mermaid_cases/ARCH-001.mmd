@@ -1,0 +1,17 @@
+flowchart LR
+  Client[Web Client] --> Gateway[API Gateway]
+  Gateway --> Auth[Auth Service]
+  Gateway --> Catalog[Catalog Service]
+  Gateway --> Order[Order Service]
+  Gateway --> Payment[Payment Service]
+  Gateway --> Inventory[Inventory Service]
+  Auth --> AuthDB[(Auth DB)]
+  Catalog --> CatalogDB[(Catalog DB)]
+  Catalog --> Cache[(Redis Cache)]
+  Order --> OrderDB[(Order DB)]
+  Payment --> PaymentDB[(Payment DB)]
+  Inventory --> InventoryDB[(Inventory DB)]
+  Order -.-> Broker[Message Broker]
+  Payment -.-> Broker
+  Inventory -.-> Broker
+  Broker --> Notify[Notification Service]

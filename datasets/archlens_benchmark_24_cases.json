@@ -1,0 +1,758 @@
+{
+  "dataset_name": "ArchLens Microservices Architecture Benchmark",
+  "version": "1.0",
+  "created_for": "Final-year project development and evaluation",
+  "case_count": 24,
+  "domains": [
+    "E-commerce",
+    "Banking",
+    "Food Delivery",
+    "Streaming",
+    "Healthcare",
+    "Social Media"
+  ],
+  "label_definitions": {
+    "confirmed": "The topology explicitly contains the pattern described by the finding.",
+    "potential": "The diagram suggests a concern or does not evidence a control; external deployment/configuration facts may change the conclusion.",
+    "unknown": "Insufficient information to determine whether the property exists.",
+    "not_applicable": "The rule does not apply to this architecture."
+  },
+  "severity_definitions": {
+    "Critical": "Severe, directly evidenced architectural risk with major impact.",
+    "High": "Significant topology issue requiring attention.",
+    "Medium": "Meaningful concern or conditional risk.",
+    "Low": "Improvement opportunity or low-impact evidence gap."
+  },
+  "cases": [
+    {
+      "case_id": "ARCH-001",
+      "domain": "E-commerce",
+      "name": "Balanced e-commerce baseline",
+      "description": "A reasonably separated e-commerce architecture with distinct service-owned databases, a cache, an API gateway, and asynchronous notifications. This is a baseline, not proof of production readiness.",
+      "difficulty": "Beginner",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Client[Web Client] --> Gateway[API Gateway]\n  Gateway --> Auth[Auth Service]\n  Gateway --> Catalog[Catalog Service]\n  Gateway --> Order[Order Service]\n  Gateway --> Payment[Payment Service]\n  Gateway --> Inventory[Inventory Service]\n  Auth --> AuthDB[(Auth DB)]\n  Catalog --> CatalogDB[(Catalog DB)]\n  Catalog --> Cache[(Redis Cache)]\n  Order --> OrderDB[(Order DB)]\n  Payment --> PaymentDB[(Payment DB)]\n  Inventory --> InventoryDB[(Inventory DB)]\n  Order -.-> Broker[Message Broker]\n  Payment -.-> Broker\n  Inventory -.-> Broker\n  Broker --> Notify[Notification Service]"
+      },
+      "expected_summary": "No deliberately seeded topology anti-pattern. Do not claim the architecture is secure or highly available solely from this diagram.",
+      "expected_findings": [],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-002",
+      "domain": "E-commerce",
+      "name": "Shared database across business services",
+      "description": "Several independently deployed business services directly access one shared relational database.",
+      "difficulty": "Intermediate",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Client[Web Client] --> Gateway[API Gateway]\n  Gateway --> User[User Service]\n  Gateway --> Order[Order Service]\n  Gateway --> Payment[Payment Service]\n  Gateway --> Inventory[Inventory Service]\n  User --> SharedDB[(Shared PostgreSQL)]\n  Order --> SharedDB\n  Payment --> SharedDB\n  Inventory --> SharedDB"
+      },
+      "expected_summary": "One confirmed shared-database ownership risk.",
+      "expected_findings": [
+        {
+          "rule_id": "AP-02",
+          "title": "Shared database across services",
+          "severity": "High",
+          "status": "confirmed",
+          "evidence": "User, Order, Payment, and Inventory services all connect directly to Shared PostgreSQL.",
+          "rationale": "Shared schema/storage ownership can create tight coupling, coordinated deployments, and contention between services.",
+          "responsible_agent": "Cost & Maintenance",
+          "expected_detection": true
+        }
+      ],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-003",
+      "domain": "E-commerce",
+      "name": "Long synchronous checkout chain",
+      "description": "Checkout depends on a long sequence of synchronous service calls. The diagram makes the chain explicit; it does not prove an outage will occur.",
+      "difficulty": "Intermediate",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Client[Web Client] --> Gateway[API Gateway]\n  Gateway --> Checkout[Checkout Service]\n  Checkout --> User[User Service]\n  User --> Pricing[Pricing Service]\n  Pricing --> Inventory[Inventory Service]\n  Inventory --> Payment[Payment Service]\n  Payment --> Tax[Tax Service]\n  Tax --> Order[Order Service]\n  Order --> OrderDB[(Order DB)]"
+      },
+      "expected_summary": "One confirmed long synchronous dependency chain.",
+      "expected_findings": [
+        {
+          "rule_id": "AP-05",
+          "title": "Long synchronous dependency chain",
+          "severity": "High",
+          "status": "confirmed",
+          "evidence": "Checkout → User → Pricing → Inventory → Payment → Tax → Order is a multi-hop request path.",
+          "rationale": "A long synchronous chain increases end-to-end latency and propagates downstream slowness into checkout.",
+          "responsible_agent": "Scalability",
+          "expected_detection": true
+        }
+      ],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-004",
+      "domain": "E-commerce",
+      "name": "Shared database and single gateway dependency",
+      "description": "Multiple services share a database, and all client traffic enters through one gateway. The database issue is confirmed; gateway redundancy is not evidenced.",
+      "difficulty": "Intermediate",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Client[Web Client] --> Gateway[API Gateway]\n  Gateway --> User[User Service]\n  Gateway --> Order[Order Service]\n  Gateway --> Catalog[Catalog Service]\n  User --> SharedDB[(Shared PostgreSQL)]\n  Order --> SharedDB\n  Catalog --> SharedDB\n  Gateway --> Auth[Auth Service]"
+      },
+      "expected_summary": "One confirmed shared-database risk and one potential gateway availability concern.",
+      "expected_findings": [
+        {
+          "rule_id": "AP-02",
+          "title": "Shared database across services",
+          "severity": "High",
+          "status": "confirmed",
+          "evidence": "User, Order, and Catalog services all connect to Shared PostgreSQL.",
+          "rationale": "Shared persistence creates coupling and may complicate independent service evolution.",
+          "responsible_agent": "Cost & Maintenance",
+          "expected_detection": true
+        },
+        {
+          "rule_id": "AP-04",
+          "title": "Potential single point of failure",
+          "severity": "Medium",
+          "status": "potential",
+          "evidence": "The diagram shows one API Gateway instance/component and no alternate gateway path.",
+          "rationale": "The diagram does not show redundancy. This is a topology-level concern, not proof that deployment lacks replicas or failover.",
+          "responsible_agent": "Scalability",
+          "expected_detection": true
+        }
+      ],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-005",
+      "domain": "Banking",
+      "name": "Banking service with separated data ownership",
+      "description": "A banking baseline with separate account, transfer, and customer data stores, plus an event broker for notifications.",
+      "difficulty": "Beginner",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Mobile[Mobile Banking App] --> Gateway[API Gateway]\n  Gateway --> Auth[Identity Service]\n  Gateway --> Account[Account Service]\n  Gateway --> Transfer[Transfer Service]\n  Gateway --> Customer[Customer Service]\n  Account --> AccountDB[(Account DB)]\n  Transfer --> TransferDB[(Transfer DB)]\n  Customer --> CustomerDB[(Customer DB)]\n  Transfer -.-> Broker[Event Broker]\n  Broker --> Notify[Notification Service]"
+      },
+      "expected_summary": "No deliberately seeded issue. Authentication controls, encryption, audit logging, and deployment redundancy are not fully evidenced by topology alone.",
+      "expected_findings": [],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-006",
+      "domain": "Banking",
+      "name": "Circular service dependencies",
+      "description": "Account and Transfer services synchronously depend on each other, forming a directed cycle.",
+      "difficulty": "Intermediate",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Client[Banking Client] --> Gateway[API Gateway]\n  Gateway --> Account[Account Service]\n  Gateway --> Transfer[Transfer Service]\n  Account --> Transfer\n  Transfer --> Account\n  Account --> AccountDB[(Account DB)]\n  Transfer --> TransferDB[(Transfer DB)]"
+      },
+      "expected_summary": "One confirmed directed dependency cycle.",
+      "expected_findings": [
+        {
+          "rule_id": "AP-03",
+          "title": "Circular service dependency",
+          "severity": "High",
+          "status": "confirmed",
+          "evidence": "Account Service → Transfer Service and Transfer Service → Account Service form a directed cycle.",
+          "rationale": "Bidirectional runtime dependencies can complicate deployment, testing, failure isolation, and ownership boundaries.",
+          "responsible_agent": "Scalability",
+          "expected_detection": true
+        }
+      ],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-007",
+      "domain": "Banking",
+      "name": "No authentication component shown",
+      "description": "The diagram shows client access to internal banking services without an explicit identity/authentication component. Absence from the diagram is not proof that authentication is absent in deployment.",
+      "difficulty": "Intermediate",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Mobile[Mobile Banking App] --> Account[Account Service]\n  Mobile --> Transfer[Transfer Service]\n  Account --> AccountDB[(Account DB)]\n  Transfer --> TransferDB[(Transfer DB)]"
+      },
+      "expected_summary": "One potential security concern due to missing authentication evidence.",
+      "expected_findings": [
+        {
+          "rule_id": "AP-09",
+          "title": "Authentication boundary not evidenced",
+          "severity": "Medium",
+          "status": "potential",
+          "evidence": "No identity provider, authentication gateway, token validation, or authorization component is represented.",
+          "rationale": "The diagram does not evidence an authentication boundary. Confirm implementation details before classifying this as a vulnerability.",
+          "responsible_agent": "Security",
+          "expected_detection": true
+        }
+      ],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-008",
+      "domain": "Banking",
+      "name": "Shared ledger database and synchronous chain",
+      "description": "Account, Transfer, and Reporting services share one ledger database; transfer processing also has a multi-hop synchronous path.",
+      "difficulty": "Intermediate",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Client[Banking Client] --> Gateway[API Gateway]\n  Gateway --> Transfer[Transfer Service]\n  Transfer --> Fraud[Fraud Check Service]\n  Fraud --> Account[Account Service]\n  Account --> Limits[Limits Service]\n  Transfer --> Ledger[(Shared Ledger DB)]\n  Account --> Ledger\n  Limits --> Ledger\n  Reporting[Reporting Service] --> Ledger"
+      },
+      "expected_summary": "Two confirmed risks: shared ledger database and long synchronous chain.",
+      "expected_findings": [
+        {
+          "rule_id": "AP-02",
+          "title": "Shared database across services",
+          "severity": "High",
+          "status": "confirmed",
+          "evidence": "Transfer, Account, Limits, and Reporting services all connect to Shared Ledger DB.",
+          "rationale": "Shared data ownership can create coupling and contention, especially around a critical ledger.",
+          "responsible_agent": "Cost & Maintenance",
+          "expected_detection": true
+        },
+        {
+          "rule_id": "AP-05",
+          "title": "Long synchronous dependency chain",
+          "severity": "High",
+          "status": "confirmed",
+          "evidence": "Transfer → Fraud Check → Account → Limits is a multi-hop synchronous path.",
+          "rationale": "The chain increases latency sensitivity and can propagate downstream failures into transfer processing.",
+          "responsible_agent": "Scalability",
+          "expected_detection": true
+        }
+      ],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-009",
+      "domain": "Food Delivery",
+      "name": "Event-driven delivery platform baseline",
+      "description": "A food-delivery baseline using service-owned data stores and asynchronous events for order lifecycle updates.",
+      "difficulty": "Beginner",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  App[Customer App] --> Gateway[API Gateway]\n  Gateway --> Order[Order Service]\n  Gateway --> Restaurant[Restaurant Service]\n  Gateway --> Delivery[Delivery Service]\n  Order --> OrderDB[(Order DB)]\n  Restaurant --> RestaurantDB[(Restaurant DB)]\n  Delivery --> DeliveryDB[(Delivery DB)]\n  Order -.-> Broker[Message Broker]\n  Restaurant -.-> Broker\n  Delivery -.-> Broker\n  Broker --> Tracking[Tracking Updates]\n  Broker --> Notify[Notification Service]"
+      },
+      "expected_summary": "No deliberately seeded issue. Message delivery guarantees, broker replication, and operational monitoring are not represented.",
+      "expected_findings": [],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-010",
+      "domain": "Food Delivery",
+      "name": "High service coupling through synchronous calls",
+      "description": "Many services depend directly on one another, creating a dense synchronous dependency network.",
+      "difficulty": "Intermediate",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Gateway[API Gateway] --> Order[Order Service]\n  Gateway --> Restaurant[Restaurant Service]\n  Gateway --> Delivery[Delivery Service]\n  Order --> Restaurant\n  Order --> Delivery\n  Order --> Payment[Payment Service]\n  Restaurant --> Delivery\n  Restaurant --> Payment\n  Delivery --> Payment\n  Payment --> Order"
+      },
+      "expected_summary": "High coupling and one directed cycle are explicitly represented.",
+      "expected_findings": [
+        {
+          "rule_id": "AP-01",
+          "title": "High service coupling",
+          "severity": "High",
+          "status": "confirmed",
+          "evidence": "Order, Restaurant, Delivery, and Payment services have multiple direct dependencies, including a return dependency from Payment to Order.",
+          "rationale": "Dense inter-service dependencies increase coordination costs and reduce independent changeability.",
+          "responsible_agent": "Cost & Maintenance",
+          "expected_detection": true
+        },
+        {
+          "rule_id": "AP-03",
+          "title": "Circular service dependency",
+          "severity": "High",
+          "status": "confirmed",
+          "evidence": "Order → Payment and Payment → Order form a directed cycle.",
+          "rationale": "The cycle creates bidirectional runtime dependency and can complicate failure isolation.",
+          "responsible_agent": "Scalability",
+          "expected_detection": true
+        }
+      ],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-011",
+      "domain": "Food Delivery",
+      "name": "Synchronous tracking fan-out bottleneck",
+      "description": "A tracking service synchronously calls several downstream services for each request.",
+      "difficulty": "Intermediate",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  App[Customer App] --> Gateway[API Gateway]\n  Gateway --> Tracking[Tracking Service]\n  Tracking --> Driver[Driver Service]\n  Tracking --> Map[Mapping Service]\n  Tracking --> ETA[ETA Service]\n  Tracking --> Restaurant[Restaurant Service]\n  Driver --> DriverDB[(Driver DB)]\n  ETA --> LocationDB[(Location DB)]"
+      },
+      "expected_summary": "One potential central fan-out bottleneck.",
+      "expected_findings": [
+        {
+          "rule_id": "AP-07",
+          "title": "Potential scalability bottleneck",
+          "severity": "Medium",
+          "status": "potential",
+          "evidence": "Tracking Service is a central synchronous fan-out point to Driver, Mapping, ETA, and Restaurant services.",
+          "rationale": "High request volume or slow downstream dependencies could make this component a bottleneck; traffic and capacity data are needed to confirm.",
+          "responsible_agent": "Scalability",
+          "expected_detection": true
+        }
+      ],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-012",
+      "domain": "Food Delivery",
+      "name": "Shared data and missing asynchronous order events",
+      "description": "Order, Restaurant, and Delivery services share one database. Order lifecycle updates are represented only as synchronous calls.",
+      "difficulty": "Intermediate",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  App[Customer App] --> Gateway[API Gateway]\n  Gateway --> Order[Order Service]\n  Order --> Restaurant[Restaurant Service]\n  Restaurant --> Delivery[Delivery Service]\n  Order --> SharedDB[(Shared Delivery DB)]\n  Restaurant --> SharedDB\n  Delivery --> SharedDB"
+      },
+      "expected_summary": "One confirmed shared database risk and one conditional architecture improvement.",
+      "expected_findings": [
+        {
+          "rule_id": "AP-02",
+          "title": "Shared database across services",
+          "severity": "High",
+          "status": "confirmed",
+          "evidence": "Order, Restaurant, and Delivery services all connect to Shared Delivery DB.",
+          "rationale": "Multiple services sharing persistence can create schema coupling and contention.",
+          "responsible_agent": "Cost & Maintenance",
+          "expected_detection": true
+        },
+        {
+          "rule_id": "AP-08",
+          "title": "Asynchronous communication not evidenced",
+          "severity": "Low",
+          "status": "potential",
+          "evidence": "Order lifecycle communication is shown as synchronous service-to-service calls; no broker or event path is represented.",
+          "rationale": "Asynchronous messaging may improve decoupling for selected workflows, but its absence is not automatically a defect. Validate consistency and latency requirements.",
+          "responsible_agent": "Scalability",
+          "expected_detection": true
+        }
+      ],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-013",
+      "domain": "Streaming",
+      "name": "Streaming platform with event pipeline baseline",
+      "description": "A streaming architecture with separate ingest, processing, catalog, and playback services, plus an event pipeline.",
+      "difficulty": "Beginner",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Client[Streaming Client] --> Gateway[API Gateway]\n  Gateway --> Playback[Playback Service]\n  Gateway --> Catalog[Catalog Service]\n  Gateway --> Auth[Auth Service]\n  Playback --> CDN[Content Delivery Network]\n  Catalog --> CatalogDB[(Catalog DB)]\n  Auth --> AuthDB[(Auth DB)]\n  Ingest[Ingest Service] --> Broker[Event Stream]\n  Broker --> Transcode[Transcoding Workers]\n  Transcode --> ObjectStore[(Media Object Storage)]"
+      },
+      "expected_summary": "No deliberately seeded issue. CDN capacity, worker autoscaling, storage durability, and regional redundancy are not inferable from this diagram.",
+      "expected_findings": [],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-014",
+      "domain": "Streaming",
+      "name": "Central synchronous processing bottleneck",
+      "description": "All ingest and transcoding requests pass through one central processing service and synchronous worker chain.",
+      "difficulty": "Intermediate",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Upload[Content Upload] --> Ingest[Ingest Service]\n  Ingest --> Transcode[Transcoding Service]\n  Transcode --> Metadata[Metadata Service]\n  Metadata --> MediaDB[(Media Metadata DB)]\n  Metadata --> Storage[(Media Storage)]"
+      },
+      "expected_summary": "One potential ingest/transcoding throughput bottleneck.",
+      "expected_findings": [
+        {
+          "rule_id": "AP-07",
+          "title": "Potential central processing bottleneck",
+          "severity": "Medium",
+          "status": "potential",
+          "evidence": "All uploads pass through a single depicted Ingest Service and synchronous Transcoding Service.",
+          "rationale": "The path may constrain throughput if capacity is insufficient. Instance counts, queue depth, and workload measurements are required to confirm.",
+          "responsible_agent": "Scalability",
+          "expected_detection": true
+        }
+      ],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-015",
+      "domain": "Streaming",
+      "name": "Single depicted storage dependency",
+      "description": "The playback service depends on one depicted media storage component. The diagram does not show replication or alternate regions.",
+      "difficulty": "Intermediate",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Client[Streaming Client] --> Gateway[API Gateway]\n  Gateway --> Playback[Playback Service]\n  Playback --> MediaStore[(Media Object Storage)]\n  Playback --> Metadata[Metadata Service]\n  Metadata --> MetadataDB[(Metadata DB)]"
+      },
+      "expected_summary": "Potential resilience concern; infrastructure-level redundancy is unknown.",
+      "expected_findings": [
+        {
+          "rule_id": "AP-06",
+          "title": "Redundancy or failover not evidenced",
+          "severity": "Medium",
+          "status": "potential",
+          "evidence": "Only one media storage component and one metadata database are represented; no replication or failover path is shown.",
+          "rationale": "The diagram does not evidence redundancy. Storage platforms may provide internal durability or replication not shown here.",
+          "responsible_agent": "Scalability",
+          "expected_detection": true
+        }
+      ],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-016",
+      "domain": "Streaming",
+      "name": "Synchronous playback chain and shared metadata database",
+      "description": "Playback depends on a long synchronous path and several services share metadata storage.",
+      "difficulty": "Intermediate",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Client[Streaming Client] --> Gateway[API Gateway]\n  Gateway --> Playback[Playback Service]\n  Playback --> Entitlement[Entitlement Service]\n  Entitlement --> Profile[Profile Service]\n  Profile --> Recommendation[Recommendation Service]\n  Playback --> SharedDB[(Shared Metadata DB)]\n  Profile --> SharedDB\n  Recommendation --> SharedDB"
+      },
+      "expected_summary": "Two confirmed risks: long synchronous chain and shared metadata database.",
+      "expected_findings": [
+        {
+          "rule_id": "AP-05",
+          "title": "Long synchronous dependency chain",
+          "severity": "High",
+          "status": "confirmed",
+          "evidence": "Playback → Entitlement → Profile → Recommendation is a multi-hop synchronous path.",
+          "rationale": "A user-facing playback request may become latency-sensitive to multiple downstream services.",
+          "responsible_agent": "Scalability",
+          "expected_detection": true
+        },
+        {
+          "rule_id": "AP-02",
+          "title": "Shared database across services",
+          "severity": "High",
+          "status": "confirmed",
+          "evidence": "Playback, Profile, and Recommendation services connect to Shared Metadata DB.",
+          "rationale": "Shared persistence creates coupling between independently evolving services.",
+          "responsible_agent": "Cost & Maintenance",
+          "expected_detection": true
+        }
+      ],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-017",
+      "domain": "Healthcare",
+      "name": "Separated clinical services baseline",
+      "description": "A healthcare platform with separate patient, appointment, and billing stores, plus a notification event broker.",
+      "difficulty": "Beginner",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Portal[Patient Portal] --> Gateway[API Gateway]\n  Gateway --> Patient[Patient Service]\n  Gateway --> Appointment[Appointment Service]\n  Gateway --> Billing[Billing Service]\n  Patient --> PatientDB[(Patient DB)]\n  Appointment --> AppointmentDB[(Appointment DB)]\n  Billing --> BillingDB[(Billing DB)]\n  Appointment -.-> Broker[Event Broker]\n  Billing -.-> Broker\n  Broker --> Notify[Notification Service]"
+      },
+      "expected_summary": "No deliberately seeded issue. Regulatory compliance, encryption, access policies, audit trails, and backup controls cannot be certified from topology alone.",
+      "expected_findings": [],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-018",
+      "domain": "Healthcare",
+      "name": "Shared patient database ownership",
+      "description": "Patient, Appointment, and Billing services all access the same patient database.",
+      "difficulty": "Intermediate",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Portal[Patient Portal] --> Gateway[API Gateway]\n  Gateway --> Patient[Patient Service]\n  Gateway --> Appointment[Appointment Service]\n  Gateway --> Billing[Billing Service]\n  Patient --> PatientDB[(Shared Patient DB)]\n  Appointment --> PatientDB\n  Billing --> PatientDB"
+      },
+      "expected_summary": "One confirmed shared database risk.",
+      "expected_findings": [
+        {
+          "rule_id": "AP-02",
+          "title": "Shared database across services",
+          "severity": "High",
+          "status": "confirmed",
+          "evidence": "Patient, Appointment, and Billing services all connect to Shared Patient DB.",
+          "rationale": "Shared data ownership can create coupling and contention. In healthcare, it also requires careful access-boundary design.",
+          "responsible_agent": "Cost & Maintenance",
+          "expected_detection": true
+        }
+      ],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-019",
+      "domain": "Healthcare",
+      "name": "Direct client access to internal services",
+      "description": "The client connects directly to multiple internal services; no gateway or identity boundary is represented.",
+      "difficulty": "Intermediate",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Portal[Patient Portal] --> Patient[Patient Service]\n  Portal --> Appointment[Appointment Service]\n  Portal --> Records[Medical Records Service]\n  Patient --> PatientDB[(Patient DB)]\n  Appointment --> AppointmentDB[(Appointment DB)]\n  Records --> RecordsDB[(Records DB)]"
+      },
+      "expected_summary": "Potential authentication-boundary concern; no claim of actual unauthenticated access.",
+      "expected_findings": [
+        {
+          "rule_id": "AP-09",
+          "title": "Authentication boundary not evidenced",
+          "severity": "Medium",
+          "status": "potential",
+          "evidence": "No identity provider, authentication gateway, or token validation component is represented.",
+          "rationale": "The diagram does not show how users are authenticated or authorized. Confirm controls outside the topology before calling it a vulnerability.",
+          "responsible_agent": "Security",
+          "expected_detection": true
+        },
+        {
+          "rule_id": "AP-04",
+          "title": "Potential single point of entry dependency",
+          "severity": "Low",
+          "status": "potential",
+          "evidence": "The portal is the only depicted client entry point and no alternate access path is shown.",
+          "rationale": "This is a diagram-level observation only; frontend redundancy and deployment topology are unknown.",
+          "responsible_agent": "Scalability",
+          "expected_detection": true
+        }
+      ],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-020",
+      "domain": "Healthcare",
+      "name": "Shared database, synchronous chain, and security evidence gap",
+      "description": "A medical-record request passes through a synchronous chain; multiple services share one database. Authentication is not depicted.",
+      "difficulty": "Intermediate",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Portal[Patient Portal] --> Gateway[API Gateway]\n  Gateway --> Records[Medical Records Service]\n  Records --> Consent[Consent Service]\n  Consent --> Patient[Patient Service]\n  Patient --> Audit[Audit Service]\n  Records --> SharedDB[(Shared Clinical DB)]\n  Patient --> SharedDB\n  Audit --> SharedDB"
+      },
+      "expected_summary": "Two confirmed topology risks and one potential security evidence gap.",
+      "expected_findings": [
+        {
+          "rule_id": "AP-02",
+          "title": "Shared database across services",
+          "severity": "High",
+          "status": "confirmed",
+          "evidence": "Medical Records, Patient, and Audit services all connect to Shared Clinical DB.",
+          "rationale": "Shared storage can create coupling and makes access boundaries and ownership important to verify.",
+          "responsible_agent": "Cost & Maintenance",
+          "expected_detection": true
+        },
+        {
+          "rule_id": "AP-05",
+          "title": "Long synchronous dependency chain",
+          "severity": "High",
+          "status": "confirmed",
+          "evidence": "Records → Consent → Patient → Audit is a multi-hop synchronous path.",
+          "rationale": "A clinical-record request may become latency-sensitive to downstream dependencies.",
+          "responsible_agent": "Scalability",
+          "expected_detection": true
+        },
+        {
+          "rule_id": "AP-09",
+          "title": "Authentication boundary not evidenced",
+          "severity": "Medium",
+          "status": "potential",
+          "evidence": "No identity provider or explicit token-validation component is shown.",
+          "rationale": "Authentication may exist outside the diagram; the architecture drawing does not provide evidence either way.",
+          "responsible_agent": "Security",
+          "expected_detection": true
+        }
+      ],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-021",
+      "domain": "Social Media",
+      "name": "Social platform with independent domains",
+      "description": "A social platform with separated user, post, and media data, plus an asynchronous feed event pipeline.",
+      "difficulty": "Beginner",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Client[Social App] --> Gateway[API Gateway]\n  Gateway --> User[User Service]\n  Gateway --> Post[Post Service]\n  Gateway --> Feed[Feed Service]\n  Gateway --> Media[Media Service]\n  User --> UserDB[(User DB)]\n  Post --> PostDB[(Post DB)]\n  Feed --> FeedDB[(Feed DB)]\n  Media --> ObjectStore[(Object Storage)]\n  Post -.-> Broker[Event Broker]\n  Broker --> Feed\n  Broker --> Notify[Notification Service]"
+      },
+      "expected_summary": "No deliberately seeded issue. Feed fan-out strategy, moderation, privacy enforcement, and observability are not established by this topology.",
+      "expected_findings": [],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-022",
+      "domain": "Social Media",
+      "name": "Excessive coupling and circular dependencies",
+      "description": "User, Post, and Feed services have dense synchronous dependencies and a directed cycle.",
+      "difficulty": "Intermediate",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Gateway[API Gateway] --> User[User Service]\n  Gateway --> Post[Post Service]\n  Gateway --> Feed[Feed Service]\n  User --> Post\n  Post --> Feed\n  Feed --> User\n  Post --> User"
+      },
+      "expected_summary": "High coupling and a directed cycle are explicitly represented.",
+      "expected_findings": [
+        {
+          "rule_id": "AP-01",
+          "title": "High service coupling",
+          "severity": "High",
+          "status": "confirmed",
+          "evidence": "User, Post, and Feed services have multiple direct dependencies.",
+          "rationale": "Dense dependencies increase coordination and reduce independent deployability.",
+          "responsible_agent": "Cost & Maintenance",
+          "expected_detection": true
+        },
+        {
+          "rule_id": "AP-03",
+          "title": "Circular service dependency",
+          "severity": "High",
+          "status": "confirmed",
+          "evidence": "User → Post → Feed → User forms a directed cycle; Post → User adds another reverse dependency.",
+          "rationale": "Circular runtime dependencies complicate failure isolation and service evolution.",
+          "responsible_agent": "Scalability",
+          "expected_detection": true
+        }
+      ],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-023",
+      "domain": "Social Media",
+      "name": "Observability not evidenced",
+      "description": "A social platform topology shows services and data stores but no logging, metrics, tracing, or monitoring components.",
+      "difficulty": "Intermediate",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Client[Social App] --> Gateway[API Gateway]\n  Gateway --> User[User Service]\n  Gateway --> Post[Post Service]\n  Gateway --> Feed[Feed Service]\n  User --> UserDB[(User DB)]\n  Post --> PostDB[(Post DB)]\n  Feed --> FeedDB[(Feed DB)]"
+      },
+      "expected_summary": "One potential observability evidence gap; not proof that monitoring is absent.",
+      "expected_findings": [
+        {
+          "rule_id": "AP-12",
+          "title": "Observability not evidenced",
+          "severity": "Low",
+          "status": "potential",
+          "evidence": "No logging, metrics, tracing, or monitoring components are represented.",
+          "rationale": "The diagram does not show observability tooling; it may be deployed as shared infrastructure or omitted for clarity.",
+          "responsible_agent": "Cost & Maintenance",
+          "expected_detection": true
+        }
+      ],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    },
+    {
+      "case_id": "ARCH-024",
+      "domain": "Social Media",
+      "name": "Shared datastore, dense sync dependencies, and central feed fan-out",
+      "description": "Multiple services share one database; feed requests synchronously fan out to several dependencies.",
+      "difficulty": "Intermediate",
+      "input": {
+        "format": "mermaid",
+        "content": "flowchart LR\n  Client[Social App] --> Gateway[API Gateway]\n  Gateway --> Feed[Feed Service]\n  Feed --> User[User Service]\n  Feed --> Post[Post Service]\n  Feed --> Recommendation[Recommendation Service]\n  Feed --> Media[Media Service]\n  User --> SharedDB[(Shared Social DB)]\n  Post --> SharedDB\n  Recommendation --> SharedDB\n  Media --> SharedDB"
+      },
+      "expected_summary": "One confirmed shared-database risk and one potential feed fan-out bottleneck.",
+      "expected_findings": [
+        {
+          "rule_id": "AP-02",
+          "title": "Shared database across services",
+          "severity": "High",
+          "status": "confirmed",
+          "evidence": "User, Post, Recommendation, and Media services all connect to Shared Social DB.",
+          "rationale": "Shared persistence can create data ownership ambiguity and cross-service contention.",
+          "responsible_agent": "Cost & Maintenance",
+          "expected_detection": true
+        },
+        {
+          "rule_id": "AP-07",
+          "title": "Potential central fan-out bottleneck",
+          "severity": "Medium",
+          "status": "potential",
+          "evidence": "Feed Service synchronously calls User, Post, Recommendation, and Media services.",
+          "rationale": "A high-volume feed endpoint may be constrained by downstream latency and fan-out; workload and capacity measurements are needed to confirm.",
+          "responsible_agent": "Scalability",
+          "expected_detection": true
+        }
+      ],
+      "evaluation_notes": {
+        "use_for_prompt_tuning": true,
+        "use_for_final_holdout": false,
+        "notes": "Compare findings by rule_id, status, and severity. A finding should be counted as correct only when its evidence is supported by the diagram."
+      }
+    }
+  ]
+}

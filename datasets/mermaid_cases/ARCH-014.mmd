@@ -1,0 +1,6 @@
+flowchart LR
+  Upload[Content Upload] --> Ingest[Ingest Service]
+  Ingest --> Transcode[Transcoding Service]
+  Transcode --> Metadata[Metadata Service]
+  Metadata --> MediaDB[(Media Metadata DB)]
+  Metadata --> Storage[(Media Storage)]

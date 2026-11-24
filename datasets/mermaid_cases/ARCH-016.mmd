@@ -1,0 +1,9 @@
+flowchart LR
+  Client[Streaming Client] --> Gateway[API Gateway]
+  Gateway --> Playback[Playback Service]
+  Playback --> Entitlement[Entitlement Service]
+  Entitlement --> Profile[Profile Service]
+  Profile --> Recommendation[Recommendation Service]
+  Playback --> SharedDB[(Shared Metadata DB)]
+  Profile --> SharedDB
+  Recommendation --> SharedDB

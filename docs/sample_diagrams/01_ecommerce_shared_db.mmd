@@ -1,0 +1,11 @@
+flowchart TD
+    Client[Web & Mobile Clients] --> Gateway[API Gateway]
+    Gateway --> OrderService[Order Service]
+    Gateway --> PaymentService[Payment Service]
+    Gateway --> InventoryService[Inventory Service]
+    
+    %% Architectural Flaw (AP-02): Shared Database
+    OrderService -->|SQL Query| SharedDB[(Shared PostgreSQL DB)]
+    PaymentService -->|SQL Query| SharedDB
+    
+    InventoryService -->|SQL Query| InventoryDB[(Inventory DB)]

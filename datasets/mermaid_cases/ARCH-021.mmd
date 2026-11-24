@@ -1,0 +1,13 @@
+flowchart LR
+  Client[Social App] --> Gateway[API Gateway]
+  Gateway --> User[User Service]
+  Gateway --> Post[Post Service]
+  Gateway --> Feed[Feed Service]
+  Gateway --> Media[Media Service]
+  User --> UserDB[(User DB)]
+  Post --> PostDB[(Post DB)]
+  Feed --> FeedDB[(Feed DB)]
+  Media --> ObjectStore[(Object Storage)]
+  Post -.-> Broker[Event Broker]
+  Broker --> Feed
+  Broker --> Notify[Notification Service]

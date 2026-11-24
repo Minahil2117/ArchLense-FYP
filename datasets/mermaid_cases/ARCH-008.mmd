@@ -1,0 +1,10 @@
+flowchart LR
+  Client[Banking Client] --> Gateway[API Gateway]
+  Gateway --> Transfer[Transfer Service]
+  Transfer --> Fraud[Fraud Check Service]
+  Fraud --> Account[Account Service]
+  Account --> Limits[Limits Service]
+  Transfer --> Ledger[(Shared Ledger DB)]
+  Account --> Ledger
+  Limits --> Ledger
+  Reporting[Reporting Service] --> Ledger

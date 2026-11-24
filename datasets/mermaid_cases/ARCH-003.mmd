@@ -1,0 +1,10 @@
+flowchart LR
+  Client[Web Client] --> Gateway[API Gateway]
+  Gateway --> Checkout[Checkout Service]
+  Checkout --> User[User Service]
+  User --> Pricing[Pricing Service]
+  Pricing --> Inventory[Inventory Service]
+  Inventory --> Payment[Payment Service]
+  Payment --> Tax[Tax Service]
+  Tax --> Order[Order Service]
+  Order --> OrderDB[(Order DB)]

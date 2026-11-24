@@ -1,0 +1,11 @@
+flowchart LR
+  Portal[Patient Portal] --> Gateway[API Gateway]
+  Gateway --> Patient[Patient Service]
+  Gateway --> Appointment[Appointment Service]
+  Gateway --> Billing[Billing Service]
+  Patient --> PatientDB[(Patient DB)]
+  Appointment --> AppointmentDB[(Appointment DB)]
+  Billing --> BillingDB[(Billing DB)]
+  Appointment -.-> Broker[Event Broker]
+  Billing -.-> Broker
+  Broker --> Notify[Notification Service]

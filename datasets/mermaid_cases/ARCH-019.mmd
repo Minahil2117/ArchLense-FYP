@@ -1,0 +1,7 @@
+flowchart LR
+  Portal[Patient Portal] --> Patient[Patient Service]
+  Portal --> Appointment[Appointment Service]
+  Portal --> Records[Medical Records Service]
+  Patient --> PatientDB[(Patient DB)]
+  Appointment --> AppointmentDB[(Appointment DB)]
+  Records --> RecordsDB[(Records DB)]

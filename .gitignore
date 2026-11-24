@@ -1,0 +1,116 @@
+# ==============================================================================
+# ArchLens Root .gitignore
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Environment & Secrets (NEVER COMMIT)
+# ------------------------------------------------------------------------------
+.env
+.env.*
+*.env
+*.env.*
+frontend/.env.local
+frontend/.env.*.local
+backend/.env
+backend/.env.*
+
+# Allow tracking of safe example configuration files
+!.env.example
+!frontend/.env.example
+!backend/.env.example
+
+# ------------------------------------------------------------------------------
+# 2. Python & Virtual Environments
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+backend/.venv/
+backend/venv/
+
+# Python packaging & distribution
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing & code quality caches
+.pytest_cache/
+backend/.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ------------------------------------------------------------------------------
+# 3. Node.js & Next.js
+# ------------------------------------------------------------------------------
+node_modules/
+frontend/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Next.js build outputs
+.next/
+frontend/.next/
+out/
+frontend/out/
+*.tsbuildinfo
+
+# Vercel deployment metadata
+.vercel/
+
+# ------------------------------------------------------------------------------
+# 4. Local Vector Stores & Temporary Databases (Phase 4+)
+# ------------------------------------------------------------------------------
+*.sqlite3
+*.db
+backend/data/chromadb/
+chroma_db/
+.chroma/
+
+# ------------------------------------------------------------------------------
+# 5. Operating System & Editor Artifacts
+# ------------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+# IDE & Editor folders
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+*.bak
+*.tmp

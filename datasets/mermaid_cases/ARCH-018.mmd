@@ -1,0 +1,8 @@
+flowchart LR
+  Portal[Patient Portal] --> Gateway[API Gateway]
+  Gateway --> Patient[Patient Service]
+  Gateway --> Appointment[Appointment Service]
+  Gateway --> Billing[Billing Service]
+  Patient --> PatientDB[(Shared Patient DB)]
+  Appointment --> PatientDB
+  Billing --> PatientDB

@@ -1,0 +1,11 @@
+flowchart LR
+  Mobile[Mobile Banking App] --> Gateway[API Gateway]
+  Gateway --> Auth[Identity Service]
+  Gateway --> Account[Account Service]
+  Gateway --> Transfer[Transfer Service]
+  Gateway --> Customer[Customer Service]
+  Account --> AccountDB[(Account DB)]
+  Transfer --> TransferDB[(Transfer DB)]
+  Customer --> CustomerDB[(Customer DB)]
+  Transfer -.-> Broker[Event Broker]
+  Broker --> Notify[Notification Service]

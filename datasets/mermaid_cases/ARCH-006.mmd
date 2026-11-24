@@ -1,0 +1,8 @@
+flowchart LR
+  Client[Banking Client] --> Gateway[API Gateway]
+  Gateway --> Account[Account Service]
+  Gateway --> Transfer[Transfer Service]
+  Account --> Transfer
+  Transfer --> Account
+  Account --> AccountDB[(Account DB)]
+  Transfer --> TransferDB[(Transfer DB)]

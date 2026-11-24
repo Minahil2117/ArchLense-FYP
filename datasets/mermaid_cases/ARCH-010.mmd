@@ -1,0 +1,11 @@
+flowchart LR
+  Gateway[API Gateway] --> Order[Order Service]
+  Gateway --> Restaurant[Restaurant Service]
+  Gateway --> Delivery[Delivery Service]
+  Order --> Restaurant
+  Order --> Delivery
+  Order --> Payment[Payment Service]
+  Restaurant --> Delivery
+  Restaurant --> Payment
+  Delivery --> Payment
+  Payment --> Order

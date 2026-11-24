@@ -1,0 +1,11 @@
+flowchart TD
+    Client[Web Client] --> Gateway[API Gateway]
+    Gateway --> OrderService[Order Service]
+    
+    %% Circular Dependency (AP-03)
+    OrderService -->|HTTP Request| NotificationService[Notification Service]
+    NotificationService -->|HTTP Status Check| OrderService
+    
+    %% Shared Database (AP-02)
+    OrderService -->|SQL| CoreDB[(Core Database)]
+    NotificationService -->|SQL| CoreDB

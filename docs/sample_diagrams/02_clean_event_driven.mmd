@@ -1,0 +1,16 @@
+flowchart LR
+    Client[Client App] --> Gateway[API Gateway]
+    Gateway --> OrderService[Order Service]
+    Gateway --> UserService[User Service]
+    
+    %% Database per service
+    OrderService -->|SQL| OrderDB[(Order DB)]
+    UserService -->|SQL| UserDB[(User DB)]
+    
+    %% Caching layer
+    UserService -->|Read Cache| UserCache[[Redis Cache]]
+    
+    %% Asynchronous Event Broker
+    OrderService -.->|Publish OrderPlaced| EventBus{{Kafka Event Bus}}
+    EventBus -.->|Consume Event| PaymentService[Payment Service]
+    PaymentService -->|SQL| PaymentDB[(Payment DB)]

@@ -1,0 +1,9 @@
+flowchart LR
+  Portal[Patient Portal] --> Gateway[API Gateway]
+  Gateway --> Records[Medical Records Service]
+  Records --> Consent[Consent Service]
+  Consent --> Patient[Patient Service]
+  Patient --> Audit[Audit Service]
+  Records --> SharedDB[(Shared Clinical DB)]
+  Patient --> SharedDB
+  Audit --> SharedDB

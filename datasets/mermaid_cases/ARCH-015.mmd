@@ -1,0 +1,6 @@
+flowchart LR
+  Client[Streaming Client] --> Gateway[API Gateway]
+  Gateway --> Playback[Playback Service]
+  Playback --> MediaStore[(Media Object Storage)]
+  Playback --> Metadata[Metadata Service]
+  Metadata --> MetadataDB[(Metadata DB)]

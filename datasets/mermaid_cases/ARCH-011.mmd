@@ -1,0 +1,9 @@
+flowchart LR
+  App[Customer App] --> Gateway[API Gateway]
+  Gateway --> Tracking[Tracking Service]
+  Tracking --> Driver[Driver Service]
+  Tracking --> Map[Mapping Service]
+  Tracking --> ETA[ETA Service]
+  Tracking --> Restaurant[Restaurant Service]
+  Driver --> DriverDB[(Driver DB)]
+  ETA --> LocationDB[(Location DB)]

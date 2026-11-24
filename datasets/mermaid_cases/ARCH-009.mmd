@@ -1,0 +1,13 @@
+flowchart LR
+  App[Customer App] --> Gateway[API Gateway]
+  Gateway --> Order[Order Service]
+  Gateway --> Restaurant[Restaurant Service]
+  Gateway --> Delivery[Delivery Service]
+  Order --> OrderDB[(Order DB)]
+  Restaurant --> RestaurantDB[(Restaurant DB)]
+  Delivery --> DeliveryDB[(Delivery DB)]
+  Order -.-> Broker[Message Broker]
+  Restaurant -.-> Broker
+  Delivery -.-> Broker
+  Broker --> Tracking[Tracking Updates]
+  Broker --> Notify[Notification Service]

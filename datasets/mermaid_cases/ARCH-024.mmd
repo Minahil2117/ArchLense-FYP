@@ -1,0 +1,11 @@
+flowchart LR
+  Client[Social App] --> Gateway[API Gateway]
+  Gateway --> Feed[Feed Service]
+  Feed --> User[User Service]
+  Feed --> Post[Post Service]
+  Feed --> Recommendation[Recommendation Service]
+  Feed --> Media[Media Service]
+  User --> SharedDB[(Shared Social DB)]
+  Post --> SharedDB
+  Recommendation --> SharedDB
+  Media --> SharedDB

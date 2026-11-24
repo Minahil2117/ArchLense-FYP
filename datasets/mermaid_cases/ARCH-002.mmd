@@ -1,0 +1,10 @@
+flowchart LR
+  Client[Web Client] --> Gateway[API Gateway]
+  Gateway --> User[User Service]
+  Gateway --> Order[Order Service]
+  Gateway --> Payment[Payment Service]
+  Gateway --> Inventory[Inventory Service]
+  User --> SharedDB[(Shared PostgreSQL)]
+  Order --> SharedDB
+  Payment --> SharedDB
+  Inventory --> SharedDB
